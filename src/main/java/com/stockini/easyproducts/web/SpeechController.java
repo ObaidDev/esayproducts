@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 // import com.google.cloud.speech.v1.*;
 
+import com.stockini.easyproducts.dtos.ProductResponse;
 import com.stockini.easyproducts.services.EsayProductsSpeechAgent;
+import com.stockini.easyproducts.services.ProductExtractionAgent;
 
 import dev.langchain4j.data.audio.Audio;
 import dev.langchain4j.data.message.AudioContent;
@@ -33,10 +35,12 @@ public class SpeechController {
 
 
     private final EsayProductsSpeechAgent speechAgent;
+    private final ProductExtractionAgent productAgent;
 
     @Autowired
-    public SpeechController(EsayProductsSpeechAgent speechAgent) {
+    public SpeechController(EsayProductsSpeechAgent speechAgent, ProductExtractionAgent productAgent) {
         this.speechAgent = speechAgent;
+        this.productAgent = productAgent;
     }
 
 
@@ -92,6 +96,19 @@ public class SpeechController {
         String response = speechAgent.chat(UUID.randomUUID(), audio);
 
         return response;
+
+    }
+
+
+    @PostMapping("/test2")
+    public ProductResponse test2() {
+
+        String response = """
+                We currently have 4 Nike Air Max shoes, 2 MacBook Pro laptops, and 6 Adidas running t-shirts in stock. 
+                Also, there are 3 Sony noise cancelling headphones and 5 Apple iPhone 15 Pro Max devices.
+                """;
+
+        return productAgent.extractAndEnrich(response);
 
     }
 }
