@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.stockini.easyproducts.services.EsayProductsSpeechAgent;
+import com.stockini.easyproducts.services.ProductExtractionAgent;
 
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
@@ -32,6 +33,13 @@ public class AiConfig {
     }
 
 
+
+    @Bean
+    public ProductExtractionAgent productExtractionAgent(ChatModel chatModel) {
+        return AiServices.builder(ProductExtractionAgent.class)
+                .chatModel(chatModel)
+                .build();
+    }
 
     
 
