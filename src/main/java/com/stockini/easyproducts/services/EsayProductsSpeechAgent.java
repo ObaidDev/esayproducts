@@ -3,7 +3,6 @@ package com.stockini.easyproducts.services;
 import java.util.UUID;
 
 import dev.langchain4j.data.audio.Audio;
-import dev.langchain4j.data.message.AudioContent;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.UserMessage ;
