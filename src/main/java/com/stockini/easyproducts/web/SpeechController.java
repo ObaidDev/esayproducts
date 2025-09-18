@@ -7,6 +7,7 @@ import java.util.Base64;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 // import com.google.cloud.speech.v1.*;
+import static dev.langchain4j.internal.Utils.readBytes;
 
 import com.stockini.easyproducts.dtos.ProductResponse;
 import com.stockini.easyproducts.services.EsayProductsSpeechAgent;
@@ -25,6 +27,8 @@ import dev.langchain4j.data.message.TextContent;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.audio.AudioTranscriptionRequest;
 import dev.langchain4j.model.audio.AudioTranscriptionResponse;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -37,10 +41,13 @@ public class SpeechController {
     private final EsayProductsSpeechAgent speechAgent;
     private final ProductExtractionAgent productAgent;
 
+    private final GoogleAiGeminiChatModel gemini;
+
     @Autowired
-    public SpeechController(EsayProductsSpeechAgent speechAgent, ProductExtractionAgent productAgent) {
+    public SpeechController(EsayProductsSpeechAgent speechAgent, ProductExtractionAgent productAgent, @Qualifier("geminiChatModel") GoogleAiGeminiChatModel gemini) {
         this.speechAgent = speechAgent;
         this.productAgent = productAgent;
+        this.gemini = gemini;
     }
 
 
@@ -79,23 +86,19 @@ public class SpeechController {
 
     @PostMapping("/test")
     public String test() throws IOException {
-        File audioFile = new File("/home/plutus/java/audio/OSR_us_000_0010_8k.wav");
-        byte[] audioData = Files.readAllBytes(audioFile.toPath());
 
-        Audio audio = Audio.builder()
-                        .binaryData(audioData)
-                        .build();
+        // TODO use local file
+        byte[] bytes = readBytes("file:///home/plutus/java/audio/speech-94649.mp3");
+        String base64Data = new String(Base64.getEncoder().encode(bytes));
 
-        // AudioTranscriptionRequest request = AudioTranscriptionRequest.builder()
-        //                                         .audio(audio)
-        //                                         .prompt("This is an audio file containing ...") // optional
-        //                                         .language("en") // optional
-        //                                         .temperature(0.0) // optional
-        //                                         .build();
+        UserMessage userMessage = UserMessage.from(
+                AudioContent.from(base64Data, "audio/mp3"),
+                TextContent.from("Transcribe the audio.")
+        );
 
-        String response = speechAgent.chat(UUID.randomUUID(), audio);
-
-        return response;
+        // when
+        ChatResponse response = gemini.chat(userMessage);
+        return response.toString();
 
     }
 

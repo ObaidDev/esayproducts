@@ -1,5 +1,6 @@
 package com.stockini.easyproducts.conf;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,10 +26,18 @@ public class AiConfig {
     public ChatModel chatModel() {
         return GoogleAiGeminiChatModel.builder()
                 .apiKey(aiApiKey)
-                .modelName("gemini-2.5-flash-lite") // or "gemini-1.5-pro" or "gemini-1.5-pro-med" or "gemini-2.0-pro" or "gemini-2.5-pro"
+                .modelName("gemini-2.5-flash-lite")
                 .temperature(0.3)
                 .maxOutputTokens(1024)
                 .topP(0.8)
+                .build();
+    }
+
+    @Bean(name = "geminiChatModel")
+    public GoogleAiGeminiChatModel geminiChatModel() {
+        return GoogleAiGeminiChatModel.builder()
+                .apiKey(aiApiKey)
+                .modelName("gemini-2.5-flash")
                 .build();
     }
 
